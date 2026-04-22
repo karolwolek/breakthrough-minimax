@@ -39,7 +39,7 @@ class BreakthroughState(
     val playerPositions =
       if isPlayerOneTurn then whitePositions else blackPositions
     playerPositions.flatMap { pawn =>
-      possibleMoves(whitePositions, blackPositions, pawn) match {
+      movesForPawn(pawn) match {
         case Some(moves) => moves.flatMap(makeMove(_))
         case None        => None
       }
@@ -113,36 +113,6 @@ class BreakthroughState(
           .toList
 
       }
-
-    // playerPawns.find(_ == pos) match {
-    //   case Some(value) => {
-    //     Some(
-    //       if isPlayerOneTurn then
-    //         (for
-    //           (offset, direction) <- (7 to 9).zip(Direction.values)
-    //           target = pos + offset
-    //
-    //           // Check if move is valid based on its offset
-    //           if (offset == 7 && (target) % boardSize != 0) || // left diagonal
-    //             (offset == 9 && (target) % boardSize != 1) || // right diagonal
-    //             (offset == 8 && !enemyPawns.contains(target)) || // straight
-    //             (!playerPawns.contains(target)) // ensure no self beating
-    //         yield Move(pos, target, direction)).toList
-    //       else
-    //         (for
-    //           (offset, direction) <- (7 to 9).zip(Direction.values)
-    //           target = pos - offset
-    //
-    //           // Check if move is valid based on its offset
-    //           if (offset == 7 && (target) % boardSize != 1) || // left diagonal
-    //             (offset == 9 && (target) % boardSize != 0) || // right diagonal
-    //             (offset == 8 && !enemyPawns.contains(target)) || // straight
-    //             (!playerPawns.contains(target)) // ensure no self beating
-    //         yield Move(pos, target, direction)).toList
-    //     )
-    //   }
-    //   case None => None
-    // }
 
   // check if blacks are on white 1 to n positions
   private def isBlackOnWhite(): Boolean =
