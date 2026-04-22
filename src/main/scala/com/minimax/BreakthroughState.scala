@@ -82,21 +82,59 @@ class BreakthroughState(
       enemyPawns: Set[Int],
       pos: Int
   ): Option[List[Move]] =
-    playerPawns.find(_ == pos) match {
-      case Some(value) =>
-        Some(
-          (for
-            move <- (7 to 9).zip(Direction.values)
-            // can't move left diagonal on left edge
-            if (move._1 == 7 && pos + move._1 % boardSize != 0)
-            // can't move rigth diagonal on right edge
-            if (move._1 == 9 && pos + move._1 % boardSize != 1)
-            // can't move straight, if enemy is on place
-            if (move._1 == 8 && !enemyPawns.contains(pos + move._1))
-          yield Move(pos, pos + move._1, move._2)).toList
-        )
-      case None => None
-    }
+    Option
+      .when(playerPawns.contains(pos)) {
+        val step = if isPlayerOneTurn then 1 else -1
+
+        (7 to 9)
+          .zip(Direction.values)
+          .flatMap { (offset, dir) =>
+            val target = pos + (offset * step)
+            val col = target % boardSize // columns 0-indexed
+
+            val isPathClear = offset match {
+              case 7 => col != (if isPlayerOneTurn then 0 else 1)
+              case 8 => !enemyPawns.contains(target)
+              case 9 => col != (if isPlayerOneTurn then 1 else 0)
+            }
+
+            Option.when(isPathClear && !playerPawns.contains(target)) {
+              Move(pos, target, dir)
+            }
+          }
+          .toList
+
+      }
+
+    // playerPawns.find(_ == pos) match {
+    //   case Some(value) => {
+    //     Some(
+    //       if isPlayerOneTurn then
+    //         (for
+    //           (offset, direction) <- (7 to 9).zip(Direction.values)
+    //           target = pos + offset
+    //
+    //           // Check if move is valid based on its offset
+    //           if (offset == 7 && (target) % boardSize != 0) || // left diagonal
+    //             (offset == 9 && (target) % boardSize != 1) || // right diagonal
+    //             (offset == 8 && !enemyPawns.contains(target)) || // straight
+    //             (!playerPawns.contains(target)) // ensure no self beating
+    //         yield Move(pos, target, direction)).toList
+    //       else
+    //         (for
+    //           (offset, direction) <- (7 to 9).zip(Direction.values)
+    //           target = pos - offset
+    //
+    //           // Check if move is valid based on its offset
+    //           if (offset == 7 && (target) % boardSize != 1) || // left diagonal
+    //             (offset == 9 && (target) % boardSize != 0) || // right diagonal
+    //             (offset == 8 && !enemyPawns.contains(target)) || // straight
+    //             (!playerPawns.contains(target)) // ensure no self beating
+    //         yield Move(pos, target, direction)).toList
+    //     )
+    //   }
+    //   case None => None
+    // }
 
   // check if blacks are on white 1 to n positions
   private def isBlackOnWhite(): Boolean =

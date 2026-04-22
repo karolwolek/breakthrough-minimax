@@ -16,13 +16,24 @@ class HumanPlayer extends Player[BreakthroughState] {
   def movesForPawn(s: BreakthroughState): List[Move] =
     println("Input the row and the column separated by space to choose a pawn")
     val (row, col) = StdIn.readf2("{0, number} {1,number}")
-    val pos: Int =
-      (row.asInstanceOf[Long].toInt * s.boardSize) % s.boardSize + col
-        .asInstanceOf[Long]
-        .toInt
+    val pos: Int = BreakthroughState.offset(
+      row.asInstanceOf[Long].toInt,
+      col.asInstanceOf[Long].toInt,
+      s.boardSize
+    )
     s.movesForPawn(pos) match {
-      case Some(value) => value
-      case None        => movesForPawn(s)
+      case Some(value) =>
+        value match {
+          case head :: tail => value
+          case List()       => {
+            println("No options to move")
+            movesForPawn(s)
+          }
+        }
+      case None => {
+        println("Wrong choice")
+        movesForPawn(s)
+      }
     }
 
   def chooseMove(moves: List[Move]): Move =
@@ -30,7 +41,8 @@ class HumanPlayer extends Player[BreakthroughState] {
 
     var i = 1
     moves.foreach(move => {
-      println(s"$i: ${move.direction}")
+      // NOTE: this is for debugging only
+      // println(s"$i: ${move.direction}")
       i += 1
     })
 

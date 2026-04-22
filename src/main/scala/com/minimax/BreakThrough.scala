@@ -21,12 +21,14 @@ class BreakThrough(
 
   def play() =
     println("Rozpoczynamy grę w breakthrough!")
+    println(display(game))
+
     while (!game.isGameOver) {
       if game.isPlayerOneTurn then {
-        println("Ruch gracza pierwszego")
+        println("White to move")
         game = playerOne.move(game)
       } else {
-        println("Ruch gracza drugiego")
+        println("Black to move")
         game = playerTwo.move(game)
       }
       println(display(game))
@@ -35,7 +37,7 @@ class BreakThrough(
     else println("Grę wygrywa gracz drugi")
 
   def display(state: BreakthroughState): String = {
-    (1 to boardSize)
+    (boardSize to 1 by -1)
       .map(row => {
         (1 to boardSize)
           .map(column => {
@@ -55,8 +57,8 @@ class BreakThrough(
 
   }
 
-  final val PLAYER_ONE = "B"
-  final val PLAYER_TWO = "W"
+  final val PLAYER_ONE = "W"
+  final val PLAYER_TWO = "B"
   final val EMPTY_CELL = "_"
   final val LAST_MOVE = "o"
 
