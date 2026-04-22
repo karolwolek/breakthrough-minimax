@@ -1,5 +1,8 @@
 package com.minimax
 
+import com.minimax.BreakthroughState.initBlacks
+import com.minimax.BreakthroughState.initWhites
+
 case class Move(currentPos: Int, newPos: Int, direction: Direction)
 
 enum Direction:
@@ -12,20 +15,45 @@ class BreakthroughState(
     val isPlayerOneTurn: Boolean
 ) extends State[BreakthroughState] {
 
+  def this(boardSize: Int, whitePositions: Set[Int], blackPositions: Set[Int]) =
+    this(boardSize, blackPositions, whitePositions, true)
+
+  def this(boardSize: Int) =
+    this(boardSize, initBlacks(boardSize), initWhites(boardSize), true)
+
   override def isGameOver: Boolean = playerOneWin || playerTwoWin
 
-  override def playerOneWin: Boolean = ???
+  lazy val playerOneWin: Boolean =
+    blackPositions.isEmpty || isWhiteOnBlack()
 
-  override def playerTwoWin: Boolean = ???
+  lazy val playerTwoWin: Boolean =
+    whitePositions.isEmpty || isBlackOnWhite()
 
   override def generateStates: Seq[BreakthroughState] = ???
 
   lazy val allPositions = math.pow(boardSize, 2)
 
   def makeMove(move: Move): Option[BreakthroughState] = {
-    if (pos > allPositions || pos < 1) then None
-    else if (isPlayerOneTurn) then ???
-    else ???
+    // TODO: check if below condition is needed
+    if (move.newPos > allPositions || move.newPos < 1) then None
+    else if (isPlayerOneTurn) then
+      Some(
+        BreakthroughState(
+          boardSize,
+          blackPositions - move.newPos,
+          whitePositions - move.currentPos + move.newPos,
+          !isPlayerOneTurn
+        )
+      )
+    else
+      Some(
+        BreakthroughState(
+          boardSize,
+          blackPositions - move.currentPos + move.newPos,
+          whitePositions - move.newPos,
+          !isPlayerOneTurn
+        )
+      )
   }
 
   def movesForPawn(pos: Int): Option[List[Move]] =
@@ -52,5 +80,26 @@ class BreakthroughState(
         )
       case None => None
     }
+
+  // check if blacks are on white 1 to n positions
+  private def isBlackOnWhite(): Boolean =
+    1 to boardSize exists (blackPositions
+      .contains(_))
+
+  // check if whites are on black boardsize - n to boardSize positions
+  private def isWhiteOnBlack(): Boolean =
+    (allPositions.toInt - boardSize) to allPositions.toInt exists (whitePositions
+      .contains(_))
+
+}
+
+object BreakthroughState {
+
+  def initWhites(boardSize: Int): Set[Int] =
+    (1 to 2 * boardSize).toSet
+
+  def initBlacks(boardSize: Int): Set[Int] =
+    val offset = (math.pow(boardSize, 2) - 2 * boardSize).toInt
+    initWhites(boardSize).map(_ + offset)
 
 }
