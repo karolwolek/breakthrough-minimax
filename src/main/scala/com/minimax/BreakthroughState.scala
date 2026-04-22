@@ -8,18 +8,22 @@ case class Move(currentPos: Int, newPos: Int, direction: Direction)
 enum Direction:
   case LeftDiagonal, Straight, RightDiagonal
 
+enum PawnOwner:
+  case PlayerOne, PlayerTwo, Empty, LastMove
+
 class BreakthroughState(
     val boardSize: Int = 8,
     val blackPositions: Set[Int],
     val whitePositions: Set[Int],
-    val isPlayerOneTurn: Boolean
+    val isPlayerOneTurn: Boolean,
+    private val lastMovePos: Option[Int]
 ) extends State[BreakthroughState] {
 
   def this(boardSize: Int, whitePositions: Set[Int], blackPositions: Set[Int]) =
-    this(boardSize, blackPositions, whitePositions, true)
+    this(boardSize, blackPositions, whitePositions, true, None)
 
   def this(boardSize: Int) =
-    this(boardSize, initBlacks(boardSize), initWhites(boardSize), true)
+    this(boardSize, initBlacks(boardSize), initWhites(boardSize), true, None)
 
   override def isGameOver: Boolean = playerOneWin || playerTwoWin
 
@@ -42,7 +46,8 @@ class BreakthroughState(
           boardSize,
           blackPositions - move.newPos,
           whitePositions - move.currentPos + move.newPos,
-          !isPlayerOneTurn
+          !isPlayerOneTurn,
+          Some(move.currentPos)
         )
       )
     else
@@ -51,7 +56,8 @@ class BreakthroughState(
           boardSize,
           blackPositions - move.currentPos + move.newPos,
           whitePositions - move.newPos,
-          !isPlayerOneTurn
+          !isPlayerOneTurn,
+          Some(move.currentPos)
         )
       )
   }
@@ -59,6 +65,17 @@ class BreakthroughState(
   def movesForPawn(pos: Int): Option[List[Move]] =
     if (isPlayerOneTurn) then possibleMoves(whitePositions, blackPositions, pos)
     else possibleMoves(blackPositions, whitePositions, pos)
+
+  def pawnOwner(pos: Int): PawnOwner =
+    if whitePositions.contains(pos) then PawnOwner.PlayerOne
+    else if blackPositions.contains(pos) then PawnOwner.PlayerTwo
+    else
+      lastMovePos match {
+        case Some(value) =>
+          if value == pos then PawnOwner.LastMove else PawnOwner.Empty
+        case None => PawnOwner.Empty
+
+      }
 
   private def possibleMoves(
       playerPawns: Set[Int],
@@ -101,5 +118,8 @@ object BreakthroughState {
   def initBlacks(boardSize: Int): Set[Int] =
     val offset = (math.pow(boardSize, 2) - 2 * boardSize).toInt
     initWhites(boardSize).map(_ + offset)
+
+  def offset(row: Int, column: Int, boardSize: Int) =
+    (row - 1) * boardSize + column
 
 }
