@@ -33,9 +33,17 @@ class BreakthroughState(
   lazy val playerTwoWin: Boolean =
     whitePositions.isEmpty || isBlackOnWhite()
 
-  override def generateStates: Seq[BreakthroughState] = ???
-
   lazy val allPositions = math.pow(boardSize, 2)
+
+  override def generateStates: Seq[BreakthroughState] =
+    val playerPositions =
+      if isPlayerOneTurn then whitePositions else blackPositions
+    playerPositions.flatMap { pawn =>
+      possibleMoves(whitePositions, blackPositions, pawn) match {
+        case Some(moves) => moves.flatMap(makeMove(_))
+        case None        => None
+      }
+    }.toSeq
 
   def makeMove(move: Move): Option[BreakthroughState] = {
     // TODO: check if below condition is needed
