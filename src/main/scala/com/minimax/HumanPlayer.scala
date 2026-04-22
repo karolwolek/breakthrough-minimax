@@ -5,7 +5,7 @@ import scala.io.StdIn
 class HumanPlayer extends Player[BreakthroughState] {
 
   override def move(s: BreakthroughState): BreakthroughState =
-    s.makeMove(chooseMove(moves(s))) match {
+    s.makeMove(chooseMove(movesForPawn(s))) match {
       case Some(state) => state
       case None        => {
         println("Wrong move mi amigo")
@@ -13,7 +13,7 @@ class HumanPlayer extends Player[BreakthroughState] {
       }
     }
 
-  def moves(s: BreakthroughState): List[(Int, Int)] =
+  def movesForPawn(s: BreakthroughState): List[Move] =
     println("Input the row and the column separated by space to choose a pawn")
     val (row, col) = StdIn.readf2("{0, number} {1,number}")
     val pos: Int =
@@ -21,22 +21,30 @@ class HumanPlayer extends Player[BreakthroughState] {
         .asInstanceOf[Long]
         .toInt
     s.movesForPawn(pos) match {
-      case Some(value) => value.zip(1 to 3)
-      case None        => moves(s)
+      case Some(value) => value
+      case None        => movesForPawn(s)
     }
 
-  // returns the pawn positon
-  def chooseMove(moves: List[(Int, Int)]): Int =
+  def chooseMove(moves: List[Move]): Move =
     println("Choose a move")
 
-    // max 3 moves
-    moves.foreach(println(_))
+    var i = 1
+    moves.foreach(move => {
+      println(s"$i: ${move.direction}")
+      i += 1
+    })
+
+    val options = moves
+      .zip(1 to 3)
+      .tapEach(option => {
+        println(s"$option._2: ${option._1.direction}")
+      })
 
     val choice = StdIn.readf1("{0, number}").asInstanceOf[Long].toInt
-    if (choice > moves.size || choice < 1) then chooseMove(moves)
+    if (choice > options.size || choice < 1) then chooseMove(moves)
     else
-      moves.find((index, pos) => index == choice) match {
-        case Some(value) => value._2
-        case None        => chooseMove(moves)
+      options.find((move, index) => index == choice) match {
+        case Some((move, index)) => move
+        case None                => chooseMove(moves)
       }
 }
