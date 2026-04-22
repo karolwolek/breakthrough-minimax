@@ -39,17 +39,10 @@ class HumanPlayer extends Player[BreakthroughState] {
   def chooseMove(moves: List[Move]): Move =
     println("Choose a move")
 
-    var i = 1
-    moves.foreach(move => {
-      // NOTE: this is for debugging only
-      // println(s"$i: ${move.direction}")
-      i += 1
-    })
-
     val options = moves
       .zip(1 to 3)
       .tapEach(option => {
-        println(s"$option._2: ${option._1.direction}")
+        println(s"#${option._2}: ${option._1.direction}")
       })
 
     val choice = StdIn.readf1("{0, number}").asInstanceOf[Long].toInt
