@@ -90,7 +90,7 @@ class BreakthroughState(
           .zip(Direction.values)
           .flatMap { (offset, dir) =>
             val target = pos + (offset * step)
-            val col = target % boardSize // columns 0-indexed
+            val col = target % boardSize // zero is the 8th column
 
             val isPathClear = offset match {
               case 7 => col != (if isPlayerOneTurn then 0 else 1)
