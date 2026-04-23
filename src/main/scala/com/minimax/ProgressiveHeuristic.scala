@@ -16,7 +16,14 @@ object ProgressiveHeuristic extends Heuristic[BreakthroughState] {
     val whiteEval = calculatePlayerScore(s.whitePositions, true)
     val blackEval = calculatePlayerScore(s.blackPositions, false)
 
-    if (s.isPlayerOneTurn) whiteEval - blackEval
-    else blackEval - whiteEval
+    if (s.isPlayerOneTurn) {
+      if (s.playerOneWin) return 100000.0
+      if (s.playerTwoWin) return -100000.0
+      whiteEval - blackEval
+    } else {
+      if (s.playerOneWin) return -100000.0
+      if (s.playerTwoWin) return 100000.0
+      blackEval - whiteEval
+    }
   }
 }
