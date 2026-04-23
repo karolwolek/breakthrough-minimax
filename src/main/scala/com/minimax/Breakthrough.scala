@@ -22,11 +22,15 @@ class Breakthrough(
     boardSize
   )
 
-  def play() =
+  def playVerbose() =
     println("Rozpoczynamy grę w breakthrough!")
     println(display(game))
 
+    val startTime = System.nanoTime()
+    var rounds = 0
+
     while (!game.isGameOver) {
+      rounds += 1
       if game.isPlayerOneTurn then {
         println("White to move")
         game = playerOne.move(game)
@@ -34,10 +38,56 @@ class Breakthrough(
         println("Black to move")
         game = playerTwo.move(game)
       }
-      println(display(game))
+      println(s"${display(game)}\n")
     }
+
+    val endTime = System.nanoTime()
+
     if (game.playerOneWin) println("Grę wygrywa gracz pierwszy")
     else println("Grę wygrywa gracz drugi")
+    println(s"Liczba rund: $rounds")
+
+    val timeInSeconds = (endTime - startTime) / 1_000_000_000.0
+    System.err.println(
+      s"Odwiedzone węzły gracza 1: ${playerOne.nodesVisited()}"
+    )
+    System.err.println(
+      s"Odwiedzone węzły gracza 2: ${playerTwo.nodesVisited()}"
+    )
+    System.err.println(f"Czas działania algorytmu: $timeInSeconds%.4f s")
+
+  def playWithResult(
+      depth: Int,
+      h1Name: String,
+      h2Name: String
+  ): GameSummary = {
+    val startTime = System.nanoTime()
+    var rounds = 0
+
+    while (!game.isGameOver) {
+      rounds += 1
+      if (game.isPlayerOneTurn) {
+        game = playerOne.move(game)
+      } else {
+        game = playerTwo.move(game)
+      }
+    }
+
+    val endTime = System.nanoTime()
+
+    GameSummary(
+      winner = if (game.playerOneWin) 1 else 2,
+      rounds = rounds,
+      timeTakenNanos = endTime - startTime,
+      nodesP1 = playerOne.nodesVisited(),
+      nodesP2 = playerTwo.nodesVisited(),
+      depth = depth,
+      boardSize = game.boardSize,
+      heuristicP1 = h1Name,
+      heuristicP2 = h2Name,
+      finalState = game
+    )
+  }
 
   def display(state: BreakthroughState): String = {
     (boardSize to 1 by -1)
@@ -115,3 +165,16 @@ object Breakthrough {
     }
   }
 }
+
+case class GameSummary(
+    winner: Int,
+    rounds: Int,
+    timeTakenNanos: Long,
+    nodesP1: Long,
+    nodesP2: Long,
+    depth: Int,
+    boardSize: Int,
+    heuristicP1: String,
+    heuristicP2: String,
+    finalState: BreakthroughState
+)

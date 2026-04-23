@@ -4,7 +4,7 @@ import java.io.File
 import scopt.OParser
 
 val allowedTypes = Set("human", "ai")
-val allowedHeuristics = Set("progressive", "static", "simple")
+val allowedHeuristics = Set("progressive", "balanced", "simple")
 
 case class Config(
     p1Type: String = "",
@@ -86,7 +86,7 @@ case class Config(
       def getHeuristic(name: String): Heuristic[BreakthroughState] =
         name.toLowerCase match {
           case "progressive" => ProgressiveHeuristic
-          case "static"      => PawnsAdvantageHeuristic
+          case "balanced"    => BalancedLeadHeuristic
           case "simple"      => PawnsAdvantageHeuristic
           case _             =>
             throw new IllegalArgumentException(s"Unknown heuristic: $name")
@@ -107,8 +107,9 @@ case class Config(
       val p1 = createPlayer(config.p1Type, config.p1Heuristic)
       val p2 = createPlayer(config.p2Type, config.p2Heuristic)
 
-      val game = new Breakthrough(p1, p2, 8) // assuming 8 is board size
-      game.play()
+      val game =
+        new Breakthrough(p1, p2, config.boardSize)
+      game.playVerbose()
 
     case _ => // Error messages handled by scopt
   }

@@ -52,4 +52,6 @@ class HumanPlayer extends Player[BreakthroughState] {
         case Some((move, index)) => move
         case None                => chooseMove(moves)
       }
+
+  override def nodesVisited() = 0
 }
