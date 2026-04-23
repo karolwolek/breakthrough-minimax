@@ -4,7 +4,8 @@ import java.io.File
 import scopt.OParser
 import java.io.{PrintWriter, File}
 
-val allowedTypes = Set("human", "ai")
+val heuristicTypes = Set("alfabeta", "minimax")
+val allowedTypes = Set("human") union heuristicTypes
 val allowedHeuristics = Set("progressive", "balanced", "simple")
 
 case class Config(
@@ -34,7 +35,7 @@ case class Config(
         .action((x, c) => c.copy(p1Type = x.toLowerCase))
         .validate(x =>
           if (allowedTypes.contains(x.toLowerCase)) success
-          else failure("p1 must be 'human' or 'ai'")
+          else failure(s"p1 must be ${allowedTypes.mkString("or")}")
         ),
       opt[String]("h1")
         .action((x, c) => c.copy(p1Heuristic = Some(x.toLowerCase)))
@@ -50,7 +51,7 @@ case class Config(
         .action((x, c) => c.copy(p2Type = x.toLowerCase))
         .validate(x =>
           if (allowedTypes.contains(x.toLowerCase)) success
-          else failure("p2 must be 'human' or 'ai'")
+          else failure(s"p1 must be ${allowedTypes.mkString("or")}")
         ),
       opt[String]("h2")
         .action((x, c) => c.copy(p2Heuristic = Some(x.toLowerCase)))
@@ -94,9 +95,9 @@ case class Config(
         else {
           if (c.p1Type.isEmpty || c.p2Type.isEmpty)
             failure("Single game mode requires --p1 and --p2")
-          else if (c.p1Type == "ai" && c.p1Heuristic.isEmpty)
+          else if (heuristicTypes.contains(c.p1Type) && c.p1Heuristic.isEmpty)
             failure("Player 1 is AI and requires a heuristic (--h1)")
-          else if (c.p2Type == "ai" && c.p2Heuristic.isEmpty)
+          else if (heuristicTypes.contains(c.p2Type) && c.p2Heuristic.isEmpty)
             failure("Player 2 is AI and requires a heuristic (--h2)")
           else success
         }
@@ -120,9 +121,10 @@ case class Config(
           heuristicName: Option[String]
       ): Player[BreakthroughState] = {
         pType match {
-          case "human" => new HumanPlayer()
-          case "ai"    =>
-            // We know heuristicName is present because of checkConfig validation
+          case "human"    => new HumanPlayer()
+          case "alfabeta" =>
+            new AlfaBetaPlayer(config.depth, getHeuristic(heuristicName.get))
+          case "minimax" =>
             new MiniMaxPlayer(config.depth, getHeuristic(heuristicName.get))
         }
       }
@@ -133,8 +135,8 @@ case class Config(
           h2Name <- heuristicNames
           d <- depths
         } yield {
-          val p1 = new MiniMaxPlayer(d, getHeuristic(h1Name))
-          val p2 = new MiniMaxPlayer(d, getHeuristic(h2Name))
+          val p1 = new AlfaBetaPlayer(d, getHeuristic(h1Name))
+          val p2 = new AlfaBetaPlayer(d, getHeuristic(h2Name))
           val game =
             new Breakthrough(p1, p2, 8)
 
