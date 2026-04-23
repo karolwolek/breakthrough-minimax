@@ -1,0 +1,22 @@
+package com.minimax
+
+object ProgressiveHeurestic extends Heurestic[BreakthroughState] {
+  override def apply(s: BreakthroughState): Double = {
+    def calculatePlayerScore(positions: Set[Int], isWhite: Boolean): Double = {
+      positions.map { pos =>
+        // we count rows from 0
+        val row = (pos - 1) / s.boardSize
+        val progress = if (isWhite) row else (s.boardSize - 1) - row
+
+        // 1, 2, 4, 8, 16, 32, 64, 128
+        math.pow(2.0, progress)
+      }.sum
+    }
+
+    val whiteEval = calculatePlayerScore(s.whitePositions, true)
+    val blackEval = calculatePlayerScore(s.blackPositions, false)
+
+    if (s.isPlayerOneTurn) whiteEval - blackEval
+    else blackEval - whiteEval
+  }
+}
