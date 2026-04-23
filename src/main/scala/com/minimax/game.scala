@@ -2,8 +2,8 @@ package com.minimax
 
 @main def game() = {
   val game = new BreakThrough(
-    new HumanPlayer(),
-    new HumanPlayer(),
+    new MiniMaxPlayer(3, ProgressiveHeurestic),
+    new MiniMaxPlayer(3, ProgressiveHeurestic),
     8
   )
 

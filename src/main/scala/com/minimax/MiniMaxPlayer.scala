@@ -4,10 +4,6 @@ import scala.io.StdIn
 
 case class Evaluation[S <: State[S]](state: S, score: Double)
 
-extension (double: Double)
-  def *[S <: State[S]](evaluation: Evaluation[S]): Evaluation[S] =
-    new Evaluation(evaluation.state, evaluation.score * double)
-
 class MiniMaxPlayer[S <: State[S]](miniMaxDepth: Int, heurestic: Heurestic[S])
     extends Player[S] {
 
