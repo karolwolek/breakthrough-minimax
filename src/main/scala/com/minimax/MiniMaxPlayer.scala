@@ -20,8 +20,7 @@ class MiniMaxPlayer[S <: State[S]](miniMaxDepth: Int, heurestic: Heurestic[S])
     else
       s.generateStates.foldLeft(Double.NegativeInfinity)((max, state) => {
         val score = -1 * negamax(state, depth - 1)
-        if score > max then score
-        else max
+        math.max(score, max)
       })
 
 }

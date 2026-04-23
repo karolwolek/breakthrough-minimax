@@ -3,7 +3,7 @@ package com.minimax
 import scala.io.Source
 import scala.util.{Try, Using}
 
-class BreakThrough(
+class Breakthrough(
     playerOne: Player[BreakthroughState],
     playerTwo: Player[BreakthroughState],
     var game: BreakthroughState,
@@ -47,10 +47,10 @@ class BreakThrough(
             state.pawnOwner(
               BreakthroughState.offset(row, column, boardSize)
             ) match {
-              case PawnOwner.Empty     => BreakThrough.EMPTY_CELL
-              case PawnOwner.LastMove  => BreakThrough.LAST_MOVE
-              case PawnOwner.PlayerOne => BreakThrough.PLAYER_ONE
-              case PawnOwner.PlayerTwo => BreakThrough.PLAYER_TWO
+              case PawnOwner.Empty     => Breakthrough.EMPTY_CELL
+              case PawnOwner.LastMove  => Breakthrough.LAST_MOVE
+              case PawnOwner.PlayerOne => Breakthrough.PLAYER_ONE
+              case PawnOwner.PlayerTwo => Breakthrough.PLAYER_TWO
             }
 
           })
@@ -60,19 +60,9 @@ class BreakThrough(
 
   }
 
-  def readStateFromFile(
-      path: String,
-      isPlayerOneTurn: Boolean
-  ): Try[BreakthroughState] = {
-    Using(Source.fromFile(path)) { source =>
-      val content = source.mkString
-      BreakthroughParser.parse(content, isPlayerOneTurn)
-    }
-  }
-
 }
 
-object BreakThrough {
+object Breakthrough {
 
   final val PLAYER_ONE = "W"
   final val PLAYER_TWO = "B"
@@ -113,5 +103,15 @@ object BreakThrough {
       isPlayerOneTurn = isPlayerOneTurn,
       lastMovePos = lastMovePos
     )
+  }
+
+  def readStateFromFile(
+      path: String,
+      isPlayerOneTurn: Boolean
+  ): Try[BreakthroughState] = {
+    Using(Source.fromFile(path)) { source =>
+      val content = source.mkString
+      parse(content, isPlayerOneTurn)
+    }
   }
 }
