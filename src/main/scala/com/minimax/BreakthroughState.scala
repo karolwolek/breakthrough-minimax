@@ -94,16 +94,19 @@ class BreakthroughState(
       .when(playerPawns.contains(pos)) {
         val step = if isPlayerOneTurn then 1 else -1
 
-        (7 to 9)
+        (boardSize - 1 to boardSize + 1)
           .zip(Direction.values)
           .flatMap { (offset, dir) =>
             val target = pos + (offset * step)
             val col = target % boardSize // zero is the 8th column
 
             val isPathClear = offset match {
-              case 7 => col != (if isPlayerOneTurn then 0 else 1)
-              case 8 => !enemyPawns.contains(target)
-              case 9 => col != (if isPlayerOneTurn then 1 else 0)
+              case x if x == boardSize - 1 =>
+                col != (if isPlayerOneTurn then 0 else 1)
+              case x if x == boardSize     => !enemyPawns.contains(target)
+              case x if x == boardSize + 1 =>
+                col != (if isPlayerOneTurn then 1 else 0)
+              case _ => false // Always include a default case
             }
 
             Option.when(isPathClear && !playerPawns.contains(target)) {
