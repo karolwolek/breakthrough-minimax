@@ -1,6 +1,6 @@
 package com.minimax
 
-object PawnsAdvantageHeurestic extends Heurestic[BreakthroughState] {
+object PawnsAdvantageHeuristic extends Heuristic[BreakthroughState] {
 
   override def apply(s: BreakthroughState): Double =
     if (s.isPlayerOneTurn) {

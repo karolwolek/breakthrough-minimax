@@ -1,6 +1,6 @@
 package com.minimax
 
-object ProgressiveHeurestic extends Heurestic[BreakthroughState] {
+object ProgressiveHeuristic extends Heuristic[BreakthroughState] {
   override def apply(s: BreakthroughState): Double = {
     def calculatePlayerScore(positions: Set[Int], isWhite: Boolean): Double = {
       positions.map { pos =>
