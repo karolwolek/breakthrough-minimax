@@ -1,5 +1,9 @@
 # University project about minimax ai algorithm implemented in scala for breakthrough board game
 
+> [!IMPORTANT]
+>
+> In project root, there are 2 files with report about the task in polish.
+
 ## Breakthrough
 
 This projects is a try of an implementation of minimax algorithm in Breakthrough
